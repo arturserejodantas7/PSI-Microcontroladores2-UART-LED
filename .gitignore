@@ -1,0 +1,14 @@
+# builds do Zephyr/west
+build*/
+twister-out*/
+# binarios dos testes no PC
+tests/host/unit_protocolo
+tests/host/vetores
+tests/host/sim_receptor
+# Python / editores / SO
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
