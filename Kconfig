@@ -1,0 +1,21 @@
+# Opcoes da aplicacao (alteraveis em prj.conf ou com -DCONFIG_...=)
+mainmenu "UART-LED: controle do LED RGB pela UART"
+
+config APP_ID_DISPOSITIVO
+	hex "ID deste receptor (byte 0 do pacote)"
+	range 0x00 0xff
+	default 0xa5
+
+config APP_CHECK_CRC8
+	bool "Campo CHECK com CRC-8 (bonus); se desligado, usa XOR"
+	default y
+	help
+	  CRC-8 com polinomio 0x07, valor inicial 0x00, sem reflexao e sem
+	  XOR final (CRC-8/SMBUS). Com 'n', CHECK = XOR dos 5 primeiros bytes.
+
+config APP_TIMEOUT_BYTE_MS
+	int "Timeout entre bytes (ms) para descartar pacote truncado"
+	range 5 1000
+	default 50
+
+source "Kconfig.zephyr"
