@@ -11,3 +11,12 @@ target_sources(app PRIVATE
   src/protocolo.c
   src/led_logica.c
 )
+
+# O MKL25Z4_features.h do hal_nxp (Zephyr 4.2) nao define a macro
+# FSL_FEATURE_TPM_HAS_32BIT_COUNTERn, usada pelo driver fsl_tpm e pelo
+# pwm_mcux_tpm. Sem ela o driver PWM (TPM) nao compila para o KL25Z.
+# Macro do tipo funcao nao pode ir por -D no CMake, entao forcamos a
+# inclusao de um cabecalho que a define (o TPM do KL25Z e de 16 bits).
+if(CONFIG_SOC_MKL25Z4 AND CONFIG_PWM_MCUX_TPM)
+  zephyr_compile_options(-include ${CMAKE_CURRENT_SOURCE_DIR}/src/kl25z_tpm_fixup.h)
+endif()

@@ -1,0 +1,8 @@
+/*
+ * Overlay alternativo SEM PWM: o LED RGB e controlado por GPIO (liga/desliga;
+ * qualquer intensidade > 0 acende o canal). Uso:
+ *   west build -p always -b frdm_kl25z . -- -DDTC_OVERLAY_FILE=gpio_simples.overlay
+ * (DTC_OVERLAY_FILE substitui o boards/frdm_kl25z.overlay, que tem o PWM.)
+ */
+/ {
+};

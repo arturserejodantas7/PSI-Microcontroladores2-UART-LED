@@ -1,0 +1,86 @@
+/*
+ * Bonus PWM: o LED RGB da FRDM-KL25Z ligado aos TPMs.
+ *
+ * O devicetree do SoC no Zephyr 4.2 (dts/arm/nxp/nxp_kl25z.dtsi) nao tem
+ * nos de TPM, entao eles sao declarados aqui. Pinos (manual da placa e
+ * MKL25Z128VLK4-pinctrl.h do hal_nxp):
+ *   vermelho PTB18 = TPM2_CH0 (ALT3)
+ *   verde    PTB19 = TPM2_CH1 (ALT3)
+ *   azul     PTD1  = TPM0_CH1 (ALT4)
+ * LEDs ativos em nivel baixo -> PWM_POLARITY_INVERTED.
+ *
+ * Relogio do contador: SIM_SOPT2[TPMSRC] = MCGPLLCLK/2 = 48 MHz (feito em
+ * led_hw.c). A frequencia informada ao driver e a do clock do nucleo
+ * (KINETIS_SIM_CORESYS_CLK = 48 MHz), igual a fonte escolhida.
+ * Prescaler 16 -> 3 MHz; periodo 1 ms (1 kHz) -> 3000 passos.
+ */
+#include <zephyr/dt-bindings/pwm/pwm.h>
+
+&pinctrl {
+	tpm0_default: tpm0_default {
+		group0 {
+			pinmux = <TPM0_CH1_PTD1>;
+			drive-strength = "low";
+			slew-rate = "slow";
+		};
+	};
+
+	tpm2_default: tpm2_default {
+		group0 {
+			pinmux = <TPM2_CH0_PTB18>,
+				 <TPM2_CH1_PTB19>;
+			drive-strength = "low";
+			slew-rate = "slow";
+		};
+	};
+};
+
+/ {
+	soc {
+		tpm0: pwm@40038000 {
+			compatible = "nxp,kinetis-tpm";
+			reg = <0x40038000 0x88>;
+			interrupts = <17 0>;
+			clocks = <&sim KINETIS_SIM_CORESYS_CLK 0x103C 24>;
+			prescaler = <16>;
+			#pwm-cells = <3>;
+			pinctrl-0 = <&tpm0_default>;
+			pinctrl-names = "default";
+			status = "okay";
+		};
+
+		tpm2: pwm@4003a000 {
+			compatible = "nxp,kinetis-tpm";
+			reg = <0x4003a000 0x88>;
+			interrupts = <19 0>;
+			clocks = <&sim KINETIS_SIM_CORESYS_CLK 0x103C 26>;
+			prescaler = <16>;
+			#pwm-cells = <3>;
+			pinctrl-0 = <&tpm2_default>;
+			pinctrl-names = "default";
+			status = "okay";
+		};
+	};
+
+	pwmleds {
+		compatible = "pwm-leds";
+		red_pwm_led: pwm_led_r {
+			pwms = <&tpm2 0 PWM_MSEC(1) PWM_POLARITY_INVERTED>;
+			label = "LED RGB vermelho (PWM)";
+		};
+		green_pwm_led: pwm_led_g {
+			pwms = <&tpm2 1 PWM_MSEC(1) PWM_POLARITY_INVERTED>;
+			label = "LED RGB verde (PWM)";
+		};
+		blue_pwm_led: pwm_led_b {
+			pwms = <&tpm0 1 PWM_MSEC(1) PWM_POLARITY_INVERTED>;
+			label = "LED RGB azul (PWM)";
+		};
+	};
+
+	aliases {
+		red-pwm-led = &red_pwm_led;
+		green-pwm-led = &green_pwm_led;
+		blue-pwm-led = &blue_pwm_led;
+	};
+};
