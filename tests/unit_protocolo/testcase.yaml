@@ -1,0 +1,10 @@
+tests:
+  uart_led.protocolo:
+    tags:
+      - uart
+      - protocolo
+    platform_allow:
+      - frdm_kl25z
+      - native_sim
+    integration_platforms:
+      - native_sim
